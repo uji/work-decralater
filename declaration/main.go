@@ -8,13 +8,13 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
 )
 
 type Declaration struct {
-	ID     int `dynamo:"id" json:"-"`
-	UserID int `dynamo:"user_id" json:"user_id"`
+	UserID int `json:"user_id"`
 	// Date      time.Time `dynamo:"date" json:"date"`
 	// StartAt   time.Time `dynamo:"start_at" json:"start_at"`
 	// EndAt     time.Time `dynamo:"end_at" json:"end_at"`
@@ -27,31 +27,48 @@ type Declaration struct {
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// get db session
 	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
-	// tableName := os.Getenv("DYNAMODB_TABLE_NAME")
-	fmt.Println(request.RequestContext)
+	tableName := os.Getenv("DYNAMODB_TABLE_NAME")
 
-	sess := session.Must(session.NewSession())
-	config := aws.NewConfig().WithRegion("us-east-1")
-	if len(endpoint) > 0 {
-		config = config.WithEndpoint(endpoint)
+	fmt.Println(endpoint)
+	fmt.Println(tableName)
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("ap-northeast-1"),
+		Endpoint:    aws.String(endpoint),
+		Credentials: credentials.NewStaticCredentials("dummy", "dummy", ""),
+		DisableSSL:  aws.Bool(true),
+	})
+
+	if err != nil {
+		panic(err)
 	}
-	db := dynamo.New(sess, config)
-	declTable := db.Table("declaration")
+
+	db := dynamo.New(sess)
+	declTable := db.Table(tableName)
+
+	var result Declaration
+	err = declTable.Get("user_id", 4).One(&result)
+	fmt.Println(err.Error())
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
+
+	fmt.Println(result)
 
 	// bind request body
 	reqBody := request.Body
 	jsonBytes := ([]byte)(reqBody)
-	decl := Declaration{}
-	if err := json.Unmarshal(jsonBytes, &decl); err != nil {
+	decl := new(Declaration)
+	if err := json.Unmarshal(jsonBytes, decl); err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
 
+	fmt.Println(decl)
 	if err := declTable.Put(decl).Run(); err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
 
 	return events.APIGatewayProxyResponse{
-		Body:       fmt.Sprintf("Hello"),
 		StatusCode: 200,
 	}, nil
 }

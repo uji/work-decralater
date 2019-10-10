@@ -14,7 +14,7 @@ import (
 )
 
 type Declaration struct {
-	UserID int `json:"user_id"`
+	UserID int `json:"UserID"`
 	// Date      time.Time `dynamo:"date" json:"date"`
 	// StartAt   time.Time `dynamo:"start_at" json:"start_at"`
 	// EndAt     time.Time `dynamo:"end_at" json:"end_at"`
@@ -45,15 +45,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	db := dynamo.New(sess)
 	declTable := db.Table(tableName)
-
-	var result Declaration
-	err = declTable.Get("user_id", 4).One(&result)
-	fmt.Println(err.Error())
-	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
-	}
-
-	fmt.Println(result)
 
 	// bind request body
 	reqBody := request.Body

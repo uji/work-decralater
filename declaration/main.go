@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slack-api/domain"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -13,17 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
 )
-
-type Declaration struct {
-	UserID int `json:"UserID" dynamo:"UserID"`
-	// Date      time.Time `dynamo:"Date" json:"Date"`
-	// StartAt   time.Time `dynamo:"StartAt" json:"StartAt"`
-	// EndAt     time.Time `dynamo:"EndAt" json:"EndAt"`
-	// Breaktime time.Time `dynamo:"Breaktime" json:"Breaktime"`
-	Place     string    `dynamo:"Place" json:"Place"`
-	Comment   string    `dynamo:"Comment" json:"Comment"`
-	CreatedAt time.Time `dynamo:"CreatedAt"`
-}
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// get db session
@@ -50,7 +40,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// bind request body
 	reqBody := request.Body
 	jsonBytes := ([]byte)(reqBody)
-	decl := new(Declaration)
+	decl := new(domain.Declaration)
 	if err := json.Unmarshal(jsonBytes, decl); err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}

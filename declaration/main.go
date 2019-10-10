@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -14,14 +15,14 @@ import (
 )
 
 type Declaration struct {
-	UserID int `json:"UserID"`
-	// Date      time.Time `dynamo:"date" json:"date"`
-	// StartAt   time.Time `dynamo:"start_at" json:"start_at"`
-	// EndAt     time.Time `dynamo:"end_at" json:"end_at"`
-	// Breaktime time.Time `dynamo:"breaktime" json:"breaktime"`
-	// Place     string    `dynamo:"place" json:"place"`
-	// Comment   string    `dynamo:"comment" json:"comment"`
-	// CreatedAt time.Time `dynamo:"created_at"`
+	UserID int `json:"UserID" dynamo:"UserID"`
+	// Date      time.Time `dynamo:"Date" json:"Date"`
+	// StartAt   time.Time `dynamo:"StartAt" json:"StartAt"`
+	// EndAt     time.Time `dynamo:"EndAt" json:"EndAt"`
+	// Breaktime time.Time `dynamo:"Breaktime" json:"Breaktime"`
+	Place     string    `dynamo:"Place" json:"Place"`
+	Comment   string    `dynamo:"Comment" json:"Comment"`
+	CreatedAt time.Time `dynamo:"CreatedAt"`
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -54,7 +55,9 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{}, err
 	}
 
+	decl.CreatedAt = time.Now().UTC()
 	fmt.Println(decl)
+
 	if err := declTable.Put(decl).Run(); err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}

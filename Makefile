@@ -14,7 +14,7 @@ export:
 
 create_table:
 	aws dynamodb create-table --table-name DeclarationDynamoDBTable \
-														--attribute-definitions AttributeName=UserID,AttributeType=N \
-														--key-schema AttributeName=UserID,KeyType=HASH \
+														--attribute-definitions AttributeName=UserID,AttributeType=N AttributeName=Date,AttributeType=S \
+														--key-schema AttributeName=UserID,KeyType=HASH AttributeName=Date,KeyType=RANGE\
 														--provisioned-throughput ReadCapacityUnits=2,WriteCapacityUnits=2 \
 														--endpoint-url http://localhost:8000

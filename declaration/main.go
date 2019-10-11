@@ -15,6 +15,8 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+var layout = "2001-01-01 00:00:00 +0000 UTC"
+
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// get db session
 	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
@@ -45,9 +47,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{}, err
 	}
 
+	// save
 	decl.CreatedAt = time.Now().UTC()
-	fmt.Println(decl)
-
 	if err := declTable.Put(decl).Run(); err != nil {
 		return events.APIGatewayProxyResponse{}, err
 	}
